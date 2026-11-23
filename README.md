@@ -30,7 +30,7 @@ npm run dev
 
 1. Cloudflare Dashboard → R2 → Bucket `ai-pinterest-images` anlegen
 2. Bucket → Settings → **Public Development URL** aktivieren (`https://pub-….r2.dev`)
-3. `npx wrangler login` und dann `bash scripts/upload-r2.sh`
+3. `npx wrangler login` und dann `bash scripts/upload-r2.sh` (legt Bucket + Public URL auch automatisch an)
 4. Die `pub-….r2.dev`-URL als `IMAGE_BASE_URL` in Vercel (und `.env.local`) eintragen
 
 ## Neuen Charakter hinzufügen
