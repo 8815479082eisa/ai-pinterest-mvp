@@ -1,36 +1,41 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Muse — AI Pinterest MVP
 
-## Getting Started
+Eine Pinterest-ähnliche Plattform für KI-Charaktere und KI-Marken. Nur Frontend, mit statischen Daten.
 
-First, run the development server:
+- **Next.js 16** (App Router) + TypeScript + Tailwind CSS 4
+- Daten: `lib/data.ts` (3 fiktive Charaktere × 6 Bilder)
+- Bilder: öffentlicher **Cloudflare R2** Bucket, eingebunden über `IMAGE_BASE_URL`
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+## Struktur
+
+```
+app/page.tsx            Startseite – Masonry-Feed aller Bilder
+app/c/[slug]/page.tsx   Profilseite eines Charakters
+components/             Pin, Masonry, FollowButton
+lib/config.ts           IMAGE_BASE_URL → Bild-URLs
+lib/data.ts             Charaktere + Bilder
+r2-images/              Bilddateien, die nach R2 hochgeladen werden
+scripts/upload-r2.sh    Lädt r2-images/ in den Bucket hoch (wrangler)
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Lokal starten
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+cp .env.example .env.local   # IMAGE_BASE_URL eintragen
+npm install
+npm run dev
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Bilder nach Cloudflare R2
 
-## Learn More
+1. Cloudflare Dashboard → R2 → Bucket `ai-pinterest-images` anlegen
+2. Bucket → Settings → **Public Development URL** aktivieren (`https://pub-….r2.dev`)
+3. `npx wrangler login` und dann `bash scripts/upload-r2.sh`
+4. Die `pub-….r2.dev`-URL als `IMAGE_BASE_URL` in Vercel (und `.env.local`) eintragen
 
-To learn more about Next.js, take a look at the following resources:
+## Neuen Charakter hinzufügen
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+1. Bilder nach `r2-images/<slug>/01.jpg … 06.jpg` + `avatar.jpg` legen und hochladen
+2. In `lib/data.ts` ein neues Objekt in `characters` ergänzen – fertig.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Alle Charaktere, Creator-Namen und Bilder sind fiktiv; die Bilder wurden per Code generiert (`scripts/gen_images.py`).
