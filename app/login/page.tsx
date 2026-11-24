@@ -4,6 +4,12 @@ import { sendMagicLink } from "./actions";
 
 export const dynamic = "force-dynamic";
 
+const ERRORS: Record<string, string> = {
+  wait: "Bitte warte etwa eine Minute, bevor du einen neuen Link anforderst.",
+  link: "Der Link ist abgelaufen oder wurde schon benutzt. Fordere einfach einen neuen an.",
+  send: "Der Link konnte nicht gesendet werden. Bitte versuche es gleich noch einmal.",
+};
+
 export default async function LoginPage({ searchParams }: PageProps<"/login">) {
   if (await getUser()) redirect("/studio");
   const { sent, error } = await searchParams;
@@ -17,7 +23,8 @@ export default async function LoginPage({ searchParams }: PageProps<"/login">) {
 
       {sent ? (
         <p className="mt-10 text-base leading-relaxed">
-          Wir haben dir einen Anmeldelink geschickt. Öffne die E-Mail und klicke auf den Link.
+          Wir haben dir einen Anmeldelink geschickt. Öffne die E-Mail und klicke einmal auf den Link —
+          das funktioniert in jedem Browser. Der Link ist nur einmal gültig.
         </p>
       ) : (
         <form action={sendMagicLink} className="mt-10 space-y-4">
@@ -36,7 +43,7 @@ export default async function LoginPage({ searchParams }: PageProps<"/login">) {
           <button className="mt-6 w-full rounded-full bg-ink py-3.5 text-[11px] uppercase tracking-[0.25em] text-paper transition hover:opacity-80">
             Anmeldelink senden
           </button>
-          {error && <p className="text-sm text-red-700">Das hat nicht geklappt. Bitte versuche es erneut.</p>}
+          {error && <p className="text-sm text-red-700">{ERRORS[String(error)] ?? ERRORS.send}</p>}
         </form>
       )}
     </div>

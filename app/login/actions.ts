@@ -15,7 +15,8 @@ export async function sendMagicLink(formData: FormData) {
     options: { emailRedirectTo: `${origin}/auth/callback` },
   });
 
-  redirect(error ? "/login?error=1" : "/login?sent=1");
+  if (error) redirect(`/login?error=${error.status === 429 ? "wait" : "send"}`);
+  redirect("/login?sent=1");
 }
 
 export async function signOut() {
