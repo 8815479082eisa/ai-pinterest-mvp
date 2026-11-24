@@ -32,8 +32,11 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             <Link href="/" className="font-serif text-3xl leading-none tracking-tight">
               Muse<span className="italic">.</span>
             </Link>
-            <nav className="text-[11px] uppercase tracking-[0.25em] text-mute">
-              KI-Charaktere &amp; Marken
+            <nav className="flex items-center gap-6 text-[11px] uppercase tracking-[0.25em] text-mute">
+              <span className="hidden sm:inline">KI-Charaktere &amp; Marken</span>
+              <Link href="/studio" className="text-ink transition hover:opacity-60">
+                Studio
+              </Link>
             </nav>
           </div>
         </header>

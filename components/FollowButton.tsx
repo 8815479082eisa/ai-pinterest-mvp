@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { formatFollowers } from "@/lib/data";
+import { formatFollowers } from "@/lib/format";
 
 /** UI-only follow button: toggles local state, nothing is saved. */
 export default function FollowButton({ followers }: { followers: number }) {

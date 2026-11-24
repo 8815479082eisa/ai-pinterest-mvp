@@ -1,10 +1,12 @@
 import Masonry from "@/components/Masonry";
 import Pin from "@/components/Pin";
-import { characters, getFeed } from "@/lib/data";
+import { getFeed, getPublishedEntities } from "@/lib/data";
 import Link from "next/link";
 
-export default function Home() {
-  const feed = getFeed();
+export const dynamic = "force-dynamic";
+
+export default async function Home() {
+  const [feed, entities] = await Promise.all([getFeed(), getPublishedEntities()]);
 
   return (
     <div className="mx-auto max-w-[1600px] px-5 sm:px-10">
@@ -14,10 +16,10 @@ export default function Home() {
           Bilder von Wesen, <span className="italic">die es nicht gibt.</span>
         </h1>
         <ul className="mt-10 flex flex-wrap gap-x-8 gap-y-3 text-sm">
-          {characters.map((c) => (
-            <li key={c.slug}>
-              <Link href={`/c/${c.slug}`} className="border-b border-transparent pb-0.5 transition hover:border-ink">
-                {c.name}
+          {entities.map((e) => (
+            <li key={e.id}>
+              <Link href={`/c/${e.slug}`} className="border-b border-transparent pb-0.5 transition hover:border-ink">
+                {e.name}
               </Link>
             </li>
           ))}
@@ -25,8 +27,8 @@ export default function Home() {
       </section>
 
       <Masonry>
-        {feed.map(({ post, character }, i) => (
-          <Pin key={post.id} post={post} character={character} preload={i < 4} />
+        {feed.map((image, i) => (
+          <Pin key={image.id} image={image} entity={image.entity} preload={i < 4} />
         ))}
       </Masonry>
     </div>

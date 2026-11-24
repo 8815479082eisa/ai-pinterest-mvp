@@ -1,10 +1,9 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  cacheComponents: true,
-  partialPrefetching: true,
   images: {
-    // Local images from public/images – no external image hosts needed.
+    // Demo images live in public/images, uploads in Supabase Storage.
+    remotePatterns: [{ protocol: "https", hostname: "*.supabase.co", pathname: "/storage/v1/object/public/**" }],
     qualities: [75, 85],
   },
   turbopack: {
