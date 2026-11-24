@@ -1,10 +1,5 @@
 /**
- * Base URL of the public Cloudflare R2 bucket that hosts all images.
- * Set IMAGE_BASE_URL in Vercel (and in .env.local) to your r2.dev URL
- * or custom domain, e.g. https://pub-xxxxxxxx.r2.dev
+ * Images live in public/images and are served directly by Vercel.
+ * To move them to a CDN later, only this function needs to change.
  */
-export const IMAGE_BASE_URL = (
-  process.env.IMAGE_BASE_URL ?? "https://pub-REPLACE-ME.r2.dev"
-).replace(/\/$/, "");
-
-export const imageUrl = (path: string) => `${IMAGE_BASE_URL}/${path}`;
+export const imageUrl = (path: string) => `/images/${path}`;
