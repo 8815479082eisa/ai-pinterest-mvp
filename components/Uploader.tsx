@@ -11,6 +11,8 @@ type Props = {
   /** "images" = add to gallery (as drafts), "avatar" = replace the profile picture */
   mode: "images" | "avatar";
   label: string;
+  /** Uploads still allowed this hour (enforced by the database, shown here early) */
+  remaining: number;
 };
 
 async function dimensions(file: File) {
@@ -21,7 +23,7 @@ async function dimensions(file: File) {
 }
 
 /** Uploads files straight from the browser to Supabase Storage, then registers them. */
-export default function Uploader({ entityId, userId, mode, label }: Props) {
+export default function Uploader({ entityId, userId, mode, label, remaining }: Props) {
   const router = useRouter();
   const [status, setStatus] = useState<string | null>(null);
 
@@ -29,6 +31,14 @@ export default function Uploader({ entityId, userId, mode, label }: Props) {
     const files = Array.from(e.target.files ?? []);
     e.target.value = "";
     if (!files.length) return;
+    if (files.length > remaining) {
+      setStatus(
+        remaining === 0
+          ? "Stundenlimit erreicht – bitte später erneut."
+          : `Nur noch ${remaining} Upload${remaining === 1 ? "" : "s"} in dieser Stunde möglich.`,
+      );
+      return;
+    }
 
     const supabase = createClient();
     const uploaded = [];
@@ -41,7 +51,12 @@ export default function Uploader({ entityId, userId, mode, label }: Props) {
         const { error } = await supabase.storage
           .from("images")
           .upload(path, file, { contentType: file.type, cacheControl: "31536000" });
-        if (error) throw error;
+        if (error) {
+          // Storage answers 403 when the hourly limit (RLS policy) blocks the upload
+          if ("statusCode" in error && String(error.statusCode) === "403")
+            throw new Error("Stundenlimit erreicht – bitte später erneut.");
+          throw error;
+        }
         const url = supabase.storage.from("images").getPublicUrl(path).data.publicUrl;
         uploaded.push({ url, path, alt: file.name.replace(/\.[^.]+$/, ""), ...(await dimensions(file)) });
       }
@@ -55,7 +70,7 @@ export default function Uploader({ entityId, userId, mode, label }: Props) {
   }
 
   return (
-    <label className="inline-flex cursor-pointer items-center gap-3 rounded-full border border-ink px-6 py-2.5 text-[11px] uppercase tracking-[0.25em] transition hover:bg-ink hover:text-paper">
+    <label className="inline-flex max-w-full cursor-pointer items-center gap-3 rounded-full border border-ink px-6 py-2.5 text-[11px] uppercase tracking-[0.25em] transition hover:bg-ink hover:text-paper">
       <input
         type="file"
         accept="image/jpeg,image/png,image/webp"

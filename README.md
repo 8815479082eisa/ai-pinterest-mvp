@@ -26,6 +26,7 @@ lib/data.ts             Öffentliche Abfragen
 lib/supabase/           Supabase-Clients (Server/Browser)
 proxy.ts                Session-Refresh + Schutz für /studio
 supabase/schema.sql     Tabellen, RLS-Regeln, Storage-Bucket, Demo-Daten
+supabase/002_upload_limits.sql  Upload-Limits & Absicherung
 ```
 
 ## Lokal starten
@@ -38,7 +39,15 @@ npm install
 npm run dev
 ```
 
-Einmalig `supabase/schema.sql` im Supabase SQL-Editor ausführen.
+Einmalig `supabase/schema.sql` und danach `supabase/002_upload_limits.sql` im Supabase SQL-Editor ausführen.
+
+## Limits (in der Datenbank erzwungen)
+
+- Max. **10 Uploads pro Stunde** und Creator (inkl. Avatare; Löschen gibt kein Kontingent zurück).
+  Ändern: Funktion `public.upload_limit_per_hour()` anpassen.
+- Max. 10 MB pro Datei, nur JPG/PNG/WebP
+- Max. 20 Charaktere/Marken pro Creator
+- Bild- und Avatar-URLs dürfen nur auf eigene Uploads im Supabase Storage zeigen
 
 Jeder Push auf `main` wird von Vercel automatisch deployed.
 

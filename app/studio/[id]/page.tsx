@@ -29,6 +29,13 @@ export default async function EditEntity({ params, searchParams }: PageProps<"/s
     .eq("entity_id", id)
     .order("created_at", { ascending: false });
   const images = (data ?? []) as ImageRow[];
+
+  const { data: quota } = await supabase.rpc("my_upload_quota");
+  const { used = 0, limit = 10, resets_at } = (quota ?? {}) as { used?: number; limit?: number; resets_at?: string | null };
+  const remaining = Math.max(0, limit - used);
+  const resetTime = resets_at
+    ? new Date(resets_at).toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit", timeZone: "Europe/Berlin" })
+    : null;
   const liveCount = images.filter((i) => i.published).length;
 
   return (
@@ -51,7 +58,7 @@ export default async function EditEntity({ params, searchParams }: PageProps<"/s
             <div className="relative size-24 overflow-hidden rounded-full bg-line">
               {entity.avatar_url && <Image src={entity.avatar_url} alt="" fill sizes="96px" className="object-cover" />}
             </div>
-            <Uploader entityId={id} userId={user!.id} mode="avatar" label="Avatar ändern" />
+            <Uploader entityId={id} userId={user!.id} mode="avatar" label="Avatar ändern" remaining={remaining} />
           </div>
 
           <form action={updateEntity.bind(null, id)} className="mt-8 space-y-6">
@@ -108,10 +115,14 @@ export default async function EditEntity({ params, searchParams }: PageProps<"/s
             <p className="text-[11px] uppercase tracking-[0.3em] text-mute">
               {images.length} Bilder · {liveCount} live
             </p>
-            <Uploader entityId={id} userId={user!.id} mode="images" label="Bilder hochladen" />
+            <Uploader entityId={id} userId={user!.id} mode="images" label="Bilder hochladen" remaining={remaining} />
           </div>
-          <p className="mt-3 text-sm text-mute">
-            Neue Bilder sind zuerst Entwürfe. Klicke auf „Live schalten“, damit sie im Profil und im Feed erscheinen.
+          <p className="mt-3 text-sm">
+            Uploads diese Stunde: <span className="tabular-nums">{used} / {limit}</span>
+            {remaining === 0 && resetTime && <span className="text-mute"> · wieder möglich ab {resetTime} Uhr</span>}
+          </p>
+          <p className="mt-1 text-sm text-mute">
+            Max. {limit} Bilder pro Stunde, je max. 10 MB (JPG, PNG, WebP). Neue Bilder sind zuerst Entwürfe. Klicke auf „Live schalten“, damit sie im Profil und im Feed erscheinen.
           </p>
 
           {images.length === 0 ? (
